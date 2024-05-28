@@ -105,6 +105,59 @@ def lambda_handler(event, context):
         'body': json.dumps('Hello from Lambda!')
     }
 ----------------------------------------------------------
+ec2 creation in lambda
+
+
+import boto3
+
+def lambda_handler(event, context):
+    ec2 = boto3.client('ec2')
+    
+    # Define the EC2 instance parameters
+    instance_params = {
+        'ImageId': 'ami-0cc9838aa7ab1dce7',  # Replace with a valid AMI ID
+        'InstanceType': 't2.micro',
+        'MinCount': 1,
+        'MaxCount': 1,
+        'KeyName': 'Kaha',  # Replace with your key pair name
+        'SecurityGroupIds': ['sg-02c7d3286071f026b'],  # Replace with your security group ID
+        'SubnetId': 'subnet-06483a30f118d1767',  # Replace with your subnet ID
+    }
+    
+    try:
+        # Create the EC2 instance
+        response = ec2.run_instances(**instance_params)
+        
+        # Extract instance ID
+        instance_id = response['Instances'][0]['InstanceId']
+        
+        return {
+            'statusCode': 200,
+            'body': f'EC2 Instance {instance_id} created successfully'
+        }
+    
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': f'Error creating EC2 instance: {str(e)}'
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------
 json- task 
 
 import json
