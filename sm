@@ -1,0 +1,69 @@
+ {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Action": "secretsmanager:GetSecretValue",
+                    "Resource": "arn:aws:secretsmanager:ap-south-1:47112791735:secret:hanu_sn",
+                    "Condition": {
+                        "StringNotEquals": {
+                            "aws:PrincipalArn": [
+												"arn:aws:iam::471112791735:role/service-role/srikanth",
+											  ]
+                        }
+                    }
+                }
+            ]
+        }
+		
+		import boto3
+import json
+
+def lambda_handler(event, context):
+    
+    client = boto3.client('secretsmanager', region_name='ap-south-1')
+    
+    service_name = "hanu_sn"
+    secrets_value = 'data_of_hanus'
+
+    try:
+      
+        response = client.create_secret(
+            Name=service_name,
+            SecretString=secrets_value
+        )
+        print(f'Secret created: {response}')
+
+        
+        policy = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Action": "secretsmanager:GetSecretValue",
+                    "Resource": f"arn:aws:secretsmanager:ap-south-1:471112791735:secret:{service_name}",
+                    "Condition": {
+                        "StringNotEquals": {
+                            "aws:PrincipalArn": [
+                                "arn:aws:iam::4711127735:role/service-role/AWSGlueServiceRole-hanuglue",
+                                "arn:aws:iam::4711127735:role/aws-service-role/redshift.amazonaws.com/AWSServiceRoleForRedshift",
+                                "arn:aws:iam::4711127735:role/role3",
+                                "arn:aws:iam::4711127735:role/role4"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+
+        
+        response = client.put_resource_policy(
+            SecretId=service_name,
+            ResourcePolicy=json.dumps(policy)
+        )
+        print(f'Policy attached: {response}')
+        
+    except Exception as e:
+        print(f'Error: {e}')
